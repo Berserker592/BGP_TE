@@ -5,7 +5,7 @@
 
 ## Tabla de enrutamiento BGP(Atributos BGP no configurados)
 
-![Tabla de enrutamiento Fortigate 13](BGP_TE/Captura desde 2026-01-13 15-24-02.png)
+![Tabla de enrutamiento Fortigate 13](BGP TE/Captura desde 2026-01-13 15-24-02.png)
 
 ## Rutas al prefijo 2001:A:B:29::/64
 
