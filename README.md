@@ -1,7 +1,7 @@
 # BGP_TE
 ## Topología del laboratorio
 
-![Topología BGP-TE](BGP_TE/BGP_iBGP_Full_Mesh_IPv6.png)
+[Topología BGP-TE](BGP_TE/BGP_iBGP_Full_Mesh_IPv6.png)
 
 ## Tabla de enrutamiento BGP(Atributos BGP no configurados)
 
