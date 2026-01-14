@@ -1,0 +1,950 @@
+==============================
+Cisco_1
+==============================
+enable
+conf ter
+hostname cisco1
+ipv6 unicast-routing
+router ospfv3 10
+router-id 1.1.1.1
+exit
+interface lo0
+ipv6 addr fc00::1/128
+ipv6 ospf 10 area 10
+exit
+ipv6 addr 
+interface e0/0
+ipv6 addr 2001:a:b:14::1/64
+ipv6 ospf 10 area 10
+no shut
+exit
+interface e0/1
+ipv6 addr 2001:a:b:17::1/64
+ipv6 ospf 10 area 10
+no shut
+exit
+interface e0/2
+ipv6 addr 2001:a:b:18::1/64
+ipv6 ospf 10 area 10
+no shut
+exit
+interface e0/3
+ipv6 addr 2001:a:b:26::1/64
+ipv6 ospf 10 area 10
+no shut
+exit
+ipv6 dhcp pool LAN
+address prefix 2001:a:b:26::/64
+dns-server 2001:a:b:12::2
+exit
+inter e0/3
+ipv6 dhcp server LAN
+ipv6 nd managed-config-flag
+ipv6 nd other-config-flag 
+exit
+
+
+router bgp 700
+bgp router-id 1.1.1.1
+neighbor fc00::13 remote-as 700
+neighbor fc00::13 update-source Loopback0
+neighbor fc00::6 remote-as 700
+neighbor fc00::6 update-source Loopback0
+neighbor fc00::4 remote-as 700
+neighbor fc00::4 update-source Loopback0
+address-family ipv6 unicast
+neighbor fc00::4 activate
+neighbor fc00::6 activate
+neighbor fc00::13 activate
+exit
+==============================
+Cisco_2
+==============================
+enable
+conf ter
+hostname cisco2
+ipv6 unicast-routing
+interface e0/0
+ipv6 addr 2001:a:b:1::2/64
+no shut
+exit
+interface e0/1
+ipv6 addr 2001:a:b:2::1/64
+no shut
+exit
+interface e0/2
+ipv6 addr 2001:a:b:6::1/64
+no shut
+exit
+router bgp 100
+bgp router-id 2.2.2.2
+neighbor 2001:a:b:1::1 remote-as 700
+neighbor 2001:a:b:2::2 remote-as 200
+neighbor 2001:a:b:6::2 remote-as 400
+address-family ipv6 unicast 
+neighbor 2001:a:b:1::1 activate
+neighbor 2001:a:b:2::2 activate
+neighbor 2001:a:b:6::2 activate
+exit
+==============================
+Cisco_3
+==============================
+enable
+conf ter
+hostname cisco3
+ipv6 unicast-routing
+router isis 10
+net 49.0020.0000.0000.0003.00
+metric-style wide
+exit
+interface lo0
+ipv6 addr fc00::3/128
+ipv6 router isis 10
+isis circuit-type level-1
+exit
+interface g0/0
+ipv6 addr 2001:a:b:20::1/64
+ipv6 router isis 10
+isis circuit-type level-1
+no shut
+exit
+interface g0/1
+ipv6 addr 2001:a:b:23::1/64
+ipv6 router isis 10
+isis circuit-type level-1
+no shut
+exit
+interface g0/2
+ipv6 addr 2001:a:b:24::1/64
+ipv6 router isis 10
+isis circuit-type level-1
+no shut
+exit
+interface g0/3
+ipv6 addr 2001:a:b:29::1/64
+ipv6 router isis 10
+isis circuit-type level-1
+no shut
+exit
+ipv6 dhcp pool LAN
+address prefix 2001:a:b:29::/64
+dns-server 2001:a:b:13::1
+exit
+inter g0/3
+ipv6 dhcp server LAN
+ipv6 nd managed-config-flag
+ipv6 nd other-config-flag 
+exit
+router bgp 800
+bgp router-id 3.3.3.3
+neighbor fc00::8 remote-as 800
+neighbor fc00::8 update-source Loopback0
+neighbor fc00::10 remote-as 800
+neighbor fc00::10 update-source Loopback0
+neighbor fc00::14 remote-as 800
+neighbor fc00::14 update-source Loopback0
+address-family ipv6 unicast
+neighbor fc00::8 activate
+neighbor fc00::10 activate
+neighbor fc00::14 activate
+exit
+==============================
+VyOS_4
+==============================
+configure 
+set interfaces loopback lo address fc00::4/128
+set interfaces ethernet eth0 address 2001:a:b:16::2/64
+set interfaces ethernet eth1 address 2001:a:b:17::2/64
+set interfaces ethernet eth2 address 2001:a:b:19::2/64
+set interfaces ethernet eth3 address 2001:a:b:28::1/64
+set protocols ospfv3 parameters router-id 4.4.4.4
+set protocols ospfv3 interface eth0 area 0.0.0.10
+set protocols ospfv3 interface eth1 area 0.0.0.10
+set protocols ospfv3 interface eth2 area 0.0.0.10
+set protocols ospfv3 interface eth3 area 0.0.0.10
+set protocols ospfv3 interface lo area 0.0.0.10
+set protocols bgp system-as 700
+set protocols bgp parameters router-id 4.4.4.4
+set protocols bgp neighbor fc00::1 remote-as 700
+set protocols bgp neighbor fc00::6 remote-as 700
+set protocols bgp neighbor fc00::13 remote-as 700
+set protocols bgp neighbor fc00::1 address-family ipv6-unicast
+set protocols bgp neighbor fc00::6 address-family ipv6-unicast
+set protocols bgp neighbor fc00::13 address-family ipv6-unicast
+set protocols bgp neighbor fc00::1 update-source lo 
+set protocols bgp neighbor fc00::6 update-source lo 
+set protocols bgp neighbor fc00::13 update-source lo
+
+set service dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 subnet-id 28
+set service  dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 interface eth3
+set service  dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 option name-server 2001:a:b:12::2
+set service dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 range clientes start 2001:a:b:28::2
+set service dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 range clientes stop 2001:a:b:28::ffff
+set service dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 lease-time maximum 86400
+set service dhcpv6-server shared-network-name LAN subnet 2001:a:b:28::/64 lease-time minimum 3600
+set service router-advert interface eth3 managed-flag 
+set service router-advert interface eth3 other-config-flag
+commit
+==============================
+VyOS_5
+==============================
+configure 
+set interfaces ethernet eth0 address 2001:a:b:2::2/64
+set interfaces ethernet eth1 address 2001:a:b:3::1/64
+set interfaces ethernet eth2 address 2001:a:b:8::1/64
+set protocols bgp system-as 200
+set protocols bgp parameters router-id 5.5.5.5
+set protocols bgp neighbor 2001:a:b:2::1 remote-as 100
+set protocols bgp neighbor 2001:a:b:3::2 remote-as 300
+set protocols bgp neighbor 2001:a:b:8::2 remote-as 500
+set protocols bgp neighbor 2001:a:b:2::1 address-family ipv6-unicast
+set protocols bgp neighbor 2001:a:b:3::2 address-family ipv6-unicast
+set protocols bgp neighbor 2001:a:b:8::2 address-family ipv6-unicast
+commit
+==================================
+H3C_6
+===================================
+system-view
+interface LoopBack 0 
+ipv6 add fc00::6/128
+exit
+interface g1/0
+ipv6 address 2001:a:b:15::2/64
+exit
+interface g2/0
+ipv6 address 2001:a:b:18::2/64
+exit
+interface g3/0
+ipv6 address 2001:a:b:19::1/64
+exit
+interface g4/0
+ipv6 address 2001:a:b:27::1/64
+exit
+ospfv3 10 
+router-id 6.6.6.6 
+area 0.0.0.10
+exit
+exit
+interface lo 0
+ospfv3 10 area 0.0.0.10
+interface g1/0
+ospfv3 10 area 0.0.0.10
+interface g2/0
+ospfv3 10 area 0.0.0.10
+interface g3/0
+ospfv3 10 area 0.0.0.10
+interface g4/0
+ospfv3 10 area 0.0.0.10
+exit
+bgp 700
+router-id 6.6.6.6
+peer fc00::1 as-number 700
+peer fc00::1 source-address fc00::6
+peer fc00::4 as-number 700
+peer fc00::4 source-address fc00::6
+peer fc00::13 as-number 700
+peer fc00::13 source-address fc00::6
+address-family ipv6 unicast 
+peer fc00::1 enable
+peer fc00::4 enable
+peer fc00::13 enable
+exit
+exit
+ipv6 dhcp pool LAN
+network 2001:a:b:27::/64
+dns-server 2001:a:b:12::2
+exit
+inter g4/0
+ipv6 dhcp server apply pool LAN
+ipv6 nd ra prefix default no-advertise 
+ipv6 nd autoconfig managed-address-flag
+ipv6 nd autoconfig other-flag 
+undo ipv6 nd ra halt 
+exit
+==================================
+H3C_7
+ip ttl-expires enable
+ip unreachables enable
+ipv6 hoplimit-expires enable 
+ipv6 unreachables enable 
+===================================
+system-view
+interface g1/0
+ipv6 address 2001:a:b:5::2/64
+exit
+interface g2/0
+ipv6 address 2001:a:b:7::1/64
+exit
+interface g3/0
+ipv6 address 2001:a:b:6::2/64
+exit
+interface g4/0
+ipv6 address 2001:a:b:11::1/64
+exit
+bgp 400
+router-id 7.7.7.7
+peer 2001:a:b:5::1 as-number 700
+peer 2001:a:b:6::1 as-number 100
+peer 2001:a:b:7::2 as-number 500
+peer 2001:a:b:11::2 as-number 600
+address-family ipv6 unicast 
+peer 2001:a:b:5::1 enable
+peer 2001:a:b:6::1 enable
+peer 2001:a:b:7::2 enable
+peer 2001:a:b:11::2 enable
+exit
+exit
+==================================
+H3C_8
+===================================
+system-view
+interface LoopBack 0 
+ipv6 add fc00::8/128
+exit
+interface g1/0
+ipv6 address 2001:a:b:24::2/64
+exit
+interface g2/0
+ipv6 address 2001:a:b:21::2/64
+exit
+interface g3/0
+ipv6 address 2001:a:b:25::1/64
+exit
+interface g4/0
+ipv6 address 2001:a:b:30::1/64
+exit
+
+isis 10
+cost-style wide
+address-family ipv6 unicast 
+exit
+network-entity 49.0020.0000.0000.0008.00
+exit
+
+interface LoopBack 0 
+isis ipv6 enable 10
+isis circuit-level level-1
+exit
+inter g1/0
+isis ipv6 enable 10
+isis circuit-level level-1
+exit
+inter range g2/0
+isis ipv6 enable 10
+isis circuit-level level-1
+exit
+inter range g3/0
+isis ipv6 enable 10
+isis circuit-level level-1
+exit
+inter range g4/0
+isis ipv6 enable 10
+isis circuit-level level-1
+exit
+
+bgp 800
+router-id 8.8.8.8
+peer fc00::3 as-number 800
+peer fc00::3 source-address fc00::8
+peer fc00::10 as-number 800
+peer fc00::10 source-address fc00::8
+peer fc00::14 as-number 700
+peer fc00::14 source-address fc00::8
+address-family ipv6 unicast 
+peer fc00::3 enable
+peer fc00::10 enable
+peer fc00::14 enable
+exit
+exit
+========================================
+MIKROTIK_9
+====================================
+/routing bgp instance
+add as=600 disabled=no name=BGP600 router-id=9.9.9.9
+/ip dhcp-client
+add interface=ether1
+add interface=ether4
+/ipv6 address
+add address=2001:a:b:10::2 interface=ether1
+add address=2001:a:b:11::2 interface=ether3
+add address=2001:a:b:12::1 interface=ether2
+/routing bgp connection
+add as=600 disabled=no instance=BGP600 local.role=ebgp name=bgp_ether1 \
+    remote.address=2001:a:b:10::1/128 .as=700 routing-table=main
+add as=600 disabled=no instance=BGP600 local.role=ebgp name=bgp_ether2 \
+    remote.address=2001:a:b:12::2/128 .as=900 routing-table=main
+add as=600 disabled=no instance=BGP600 local.role=ebgp name=bgp_ether3 \
+    remote.address=2001:a:b:11::1/128 .as=400 routing-table=main
+/system identity
+set name=MIK9
+========================================
+MIKROTIK_10
+====================================
+/routing bgp instance
+add as=800 disabled=no name=BGP800 router-id=10.10.10.10
+/routing isis instance
+add afi=ipv6 areas=49.0020 name=ROU_ISIS system-id=0000.0000.0010
+/ip dhcp-client
+add interface=ether1
+# Interface not active
+add interface=ether7
+/ipv6 address
+add address=2001:a:b:4::2 interface=ether1
+add address=2001:a:b:9::2 interface=ether2
+add address=2001:a:b:13::2 interface=ether3
+add address=2001:a:b:22::1 interface=ether4
+add address=2001:a:b:20::2 interface=ether5
+add address=2001:a:b:21::1 interface=ether6
+add address=fc00::10/128 advertise=no interface=lo
+/ipv6 firewall address-list
+add address=2001:a:b:29::/64 list=BGP_PR
+add address=2001:a:b:30::/64 list=BGP_PR
+add address=2001:a:b:31::/64 list=BGP_PR
+/routing bgp connection
+add as=800 disabled=no input.filter=FILTER_IN instance=BGP800 local.role=ebgp \
+    name=bgp_ether1 output.network=BGP_PR remote.address=2001:a:b:4::1/128 \
+    .as=300 routing-table=main
+add as=800 disabled=no instance=BGP800 local.role=ebgp name=bgp_ether2 \
+    output.network=BGP_PR remote.address=2001:a:b:9::1/128 .as=500 \
+    routing-table=main
+add as=800 disabled=no input.filter=FILTER_IN_2 instance=BGP800 local.role=\
+    ebgp name=bgp_ether3 output.network=BGP_PR remote.address=\
+    2001:a:b:13::1/128 .as=900 routing-table=main
+add as=800 disabled=no instance=BGP800 local.address=fc00::10 .role=ibgp \
+    name=bgp_ether5 nexthop-choice=force-self remote.address=fc00::3/128 .as=\
+    800 routing-table=main
+add as=800 disabled=no instance=BGP800 local.address=fc00::10 .role=ibgp \
+    name=bgp_ether6 nexthop-choice=force-self remote.address=fc00::8/128 .as=\
+    800 routing-table=main
+add as=800 disabled=no instance=BGP800 local.address=fc00::10 .role=ibgp \
+    name=bgp_ether4 nexthop-choice=force-self remote.address=fc00::14/128 \
+    .as=800 routing-table=main
+/routing filter rule
+add chain=FILTER_IN comment="added by filter-wizard" disabled=no rule="if (dst\
+    \_== 2001:a:b:26::/64 or dst == 2001:a:b:28::/64 ) { set bgp-local-pref 30\
+    0; accept; }"
+add chain=FILTER_IN_2 comment="added by filter-wizard" disabled=no rule=\
+    "if (dst == 2001:a:b:27::/64) { set bgp-weight 800; accept; }"
+/routing isis interface-template
+add instance=ROU_ISIS interfaces=ether4 levels=l1
+add instance=ROU_ISIS interfaces=ether5 levels=l1
+add instance=ROU_ISIS interfaces=ether6 levels=l1
+add instance=ROU_ISIS interfaces=lo levels=l1
+/system identity
+set name=MIK10
+
+==============================
+Huawei
+==============================
+system-view
+ipv6
+interface g0/0/0
+ipv6 enable
+ipv6 addr 2001:a:b:7::2/64
+quit
+interface g0/0/1
+ipv6 enable
+ipv6 addr 2001:a:b:9::1/64
+quit
+interface g0/0/2
+ipv6 enable
+ipv6 addr 2001:a:b:8::2/64
+quit
+bgp 500
+router-id 11.11.11.11
+peer 2001:a:b:7::1 as-number 400
+peer 2001:a:b:8::1 as-number 200
+peer 2001:a:b:9::2 as-number 800
+ipv6-family unicast
+peer 2001:a:b:7::1 enable
+peer 2001:a:b:8::1 enable
+peer 2001:a:b:9::2 enable
+quit
+quit
+===================================
+JUNIPER_12
+===================================
+cli
+configure
+set interfaces em0 unit 0 family inet6 address 2001:a:b:3::2/64
+set interfaces em1 unit 0 family inet6 address 2001:a:b:4::1/64
+set protocols bgp bgp-identifier 12.12.12.12 local-as 300
+set protocols bgp group peers-externos neighbor 2001:a:b:3::1 peer-as 200
+set protocols bgp group peers-externos neighbor 2001:a:b:4::2 peer-as 800
+commit
+
+==========================================
+Fortinet13
+=========================================
+config system global
+set alias "FortiGate_13"
+set hostname "FortiGate_13"
+end
+config system interface
+edit lo0
+set vdom "root"
+set type loopback
+config ipv6
+set ip6-address fc00::13/128
+end
+next
+edit port1
+set role wan
+config ipv6
+set ip6-address 2001:a:b:1::1/64
+end
+next
+edit port2
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:5::1/64
+end
+next
+edit port3
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:10::1/64
+end
+next
+edit port4
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:14::2/64
+end
+next
+edit port5
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:16::1/64
+end
+next
+edit port6
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:15::1/64
+end
+end
+config router ospf6 
+set router-id 13.13.13.13
+config area
+edit 0.0.0.10
+end
+config ospf6-interface
+edit port4
+set area-id 0.0.0.10 
+set interface port4
+next
+edit port5
+set area-id 0.0.0.10 
+set interface port5
+next
+edit port6
+set area-id 0.0.0.10 
+set interface port6
+next
+edit lo0
+set area-id 0.0.0.10 
+set interface lo0
+next
+end
+end
+config router bgp 
+set as 700
+set router-id 13.13.13.13
+config network6
+edit 1
+set prefix6 2001:a:b:26::/64
+next
+edit 2
+set prefix6 2001:a:b:27::/64
+next
+edit 3
+set prefix6 2001:a:b:28::/64
+next
+end
+config neighbor
+edit fc00::1 
+set remote-as 700
+set update-source lo0
+set next-hop-self6 enable
+set activate6 enable
+next
+edit fc00::6
+set remote-as 700
+set update-source lo0
+set next-hop-self6 enable
+set activate6 enable
+next
+edit fc00::4
+set remote-as 700
+set update-source lo0
+set next-hop-self6 enable
+set activate6 enable
+next
+edit 2001:a:b:1::2
+set remote-as 100
+next
+edit 2001:a:b:5::2
+set remote-as 400
+next
+edit 2001:a:b:10::2
+set remote-as 600
+next
+end
+end
+config firewall policy
+    edit 1
+        set name "Trafico_4_1"
+        set srcintf "port4"
+        set dstintf "port1"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+    edit 2
+        set name "Trafico_4_2"
+        set srcintf "port4"
+        set dstintf "port2"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 3
+        set name "Trafico_4_3"
+        set srcintf "port4"
+        set dstintf "port3"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"       
+        set service "ALL"
+        set logtraffic all     
+    next
+    edit 4
+        set name "Trafico_1_4"
+        set srcintf "port1"
+        set dstintf "port4"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 5
+        set name "Trafico_2_4"
+        set srcintf "port2"
+        set dstintf "port4"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 6
+        set name "Trafico_3_4"
+        set srcintf "port3"
+        set dstintf "port4"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 7
+        set name "Trafico_6_1"
+        set srcintf "port6"
+        set dstintf "port1"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 8
+        set name "Trafico_6_2"
+        set srcintf "port6"
+        set dstintf "port2"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"        
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 9
+        set name "Trafico_6_3"
+        set srcintf "port6"
+        set dstintf "port3"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 10
+        set name "Trafico_5_2"
+        set srcintf "port5"
+        set dstintf "port2"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+end  
+config router prefix-list6
+    edit "PL_LAN_29"
+        config rule
+            edit 1
+                set prefix6 2001:a:b:29::/64
+                set action permit
+            next
+        end
+    next
+    edit "PL_LAN_30"
+        config rule
+            edit 1
+                set prefix6 2001:a:b:30::/64
+                set action permit
+            next
+        end
+    next
+    edit "PL_LAN_31"
+        config rule
+            edit 1
+                set prefix6 2001:a:b:31::/64
+                set action permit
+            next
+        end
+    next
+end	
+
+config router route-map
+    edit "RM_M_LP"
+        config rule
+            edit 1
+                set match-ip6-address "PL_LAN_29"
+                set set-local-preference 300
+            next
+        end
+    next
+    edit "RM_M_WEIGHT"
+        config rule
+            edit 1
+                set match-ip6-address "PL_LAN_30"
+                set set-weight 800
+            next
+        end
+    next
+    edit "RM_M_ASPATH"
+        config rule
+            edit 1
+                set match-ip6-address "PL_LAN_31"
+                set set-aspath-action prepend
+                set set-aspath "700 700 700"
+            next
+        end
+    next
+end
+
+config router bgp
+    config neighbor
+        edit "2001:a:b:1::2"
+            set route-map-in6 "RM_M_LP"
+        next
+        edit "2001:a:b:10::2"
+            set route-map-in6 "RM_M_WEIGHT"
+        next
+        edit "2001:a:b:5::2"
+            set route-map-in6 "RM_M_ASPATH"
+        next
+    end
+end
+
+execute router clear bgp all
+==========================================
+Fortinet14
+=========================================
+config system global
+set alias "FortiGate_14"
+set hostname "FortiGate_14"
+end
+config system interface
+edit lo0
+set vdom "root"
+set type loopback
+config ipv6
+set ip6-address fc00::14/128
+end
+next
+edit port1
+set role wan
+config ipv6
+set ip6-address 2001:a:b:22::2/64
+end
+next
+edit port2
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:23::2/64
+end
+next
+edit port3
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:25::2/64
+end
+next
+edit port4
+set mode static
+set role wan
+config ipv6
+set ip6-address 2001:a:b:31::1/64
+end
+end
+config router isis 
+set is-type level-1
+set metric-style wide
+config isis-net
+edit 1
+set net 49.0020.0000.0000.0014.00
+end
+config isis-interface 
+edit port1
+set circuit-type level-1
+set status6 enable
+set network-type broadcast
+next
+edit port2
+set circuit-type level-1
+set status6 enable
+set network-type broadcast
+next
+edit port3
+set circuit-type level-1
+set status6 enable
+set network-type broadcast
+next
+edit port4
+set circuit-type level-1
+set status6 enable
+set network-type broadcast
+next
+edit lo0
+set circuit-type level-1
+set status6 enable
+next
+end
+end
+
+config router bgp 
+set as 800
+set router-id 14.14.14.14
+config neighbor
+edit fc00::3 
+set remote-as 800
+set update-source lo0
+set activate6 enable
+next
+edit fc00::8
+set remote-as 800
+set update-source lo0
+set activate6 enable
+next
+edit fc00::10
+set remote-as 800
+set update-source lo0
+set activate6 enable
+next
+end
+end
+
+config firewall policy
+    edit 1
+        set name "Trafico_1_4"
+        set srcintf "port1"
+        set dstintf "port4"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+    edit 2
+        set name "Trafico_2_4"
+        set srcintf "port2"
+        set dstintf "port4"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 3
+        set name "Trafico_3_4"
+        set srcintf "port3"
+        set dstintf "port4"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"       
+        set service "ALL"
+        set logtraffic all     
+    next
+    edit 4
+        set name "Trafico_4_1"
+        set srcintf "port4"
+        set dstintf "port1"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+    edit 5
+        set name "Trafico_4_2"
+        set srcintf "port4"
+        set dstintf "port2"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next 
+    edit 6
+        set name "Trafico_4_3"
+        set srcintf "port4"
+        set dstintf "port3"
+        set action accept
+        set srcaddr6 "all"
+        set dstaddr6 "all"
+        set schedule "always"       
+        set service "ALL"
+        set logtraffic all     
+    next
+    end
+  
+====
